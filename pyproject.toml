@@ -1,0 +1,57 @@
+[project]
+name = "fava-git"
+version = "0.1.0"
+description = "Fava plugin for managing Beancount files with git"
+readme = "README.md"
+requires-python = ">= 3.10"
+dependencies = [
+  "fava>=1.30",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.8",
+  "pylint>=3.0",
+  "ruff>=0.5",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+fava_git = [
+  "FavaGit.js",
+  "templates/*.html",
+]
+
+[tool.ruff]
+line-length = 120
+extend-exclude = ["frontend/node_modules", "src/fava_git.egg-info"]
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+
+[tool.pylint."messages control"]
+disable = [
+  "missing-module-docstring",
+  "missing-class-docstring",
+  "missing-function-docstring",
+  "too-many-arguments",
+  "too-many-positional-arguments",
+]
+
+[tool.mypy]
+python_version = "3.10"
+mypy_path = "src"
+exclude = ["^frontend/", "^src/fava_git\\.egg-info/"]

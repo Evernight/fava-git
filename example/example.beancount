@@ -1,0 +1,12 @@
+option "title" "fava-git example"
+option "operating_currency" "USD"
+
+; Enable the Git extension
+2020-01-01 custom "fava-extension" "fava_git"
+
+2020-01-01 open Assets:Bank USD
+2020-01-01 open Equity:Opening-Balances USD
+
+2020-01-01 * "Opening balance"
+  Assets:Bank  1000 USD
+  Equity:Opening-Balances
