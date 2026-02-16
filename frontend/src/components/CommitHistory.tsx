@@ -45,7 +45,7 @@ function CommitRow({
         >
           {commit.shortHash}
         </Link>{" "}
-        · {commit.author} · {commit.date.slice(0, 10)}
+        · {commit.author} · {commit.date.slice(0, 16)}
       </Typography>
       <Typography variant="body2" sx={{ mt: 0.25 }}>
         {commit.subject}
