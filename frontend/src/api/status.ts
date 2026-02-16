@@ -88,6 +88,16 @@ export function useCreateCommit() {
   });
 }
 
+export function useCheckout() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (ref: string) => postJSON<{ ref: string }>("checkout", { ref }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: gitStatusQueryKey });
+    },
+  });
+}
+
 export function useInitRepo() {
   const queryClient = useQueryClient();
   return useMutation({

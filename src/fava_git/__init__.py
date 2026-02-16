@@ -12,6 +12,7 @@ from fava.ext import extension_endpoint
 from fava.helpers import FavaAPIError
 from flask import request
 
+from .git_ops import checkout
 from .git_ops import create_commit
 from .git_ops import delete_file
 from .git_ops import GitCommit
@@ -150,6 +151,27 @@ class FavaGit(FavaExtensionBase):
         except ValueError as e:
             raise FavaAPIError(str(e)) from e
         return {"path": path}
+
+    @extension_endpoint("checkout", methods=["POST"])
+    @api_response
+    def api_checkout(self) -> dict:
+        """Checkout a commit (detached HEAD)."""
+        payload = request.get_json(silent=True) or {}
+        ref = (payload.get("ref") or "").strip()
+        if not ref:
+            raise FavaAPIError("Commit ref is required")
+        working_dir = self._working_dir()
+        if not is_git_repo(working_dir):
+            raise FavaAPIError("Not a git repository")
+        try:
+            checkout(working_dir, ref)
+        except ValueError as e:
+            raise FavaAPIError(str(e)) from e
+        except subprocess.CalledProcessError as e:
+            if e.output:
+                raise FavaAPIError(e.output.strip() or "Checkout failed") from e
+            raise FavaAPIError("Checkout failed") from e
+        return {"ref": ref}
 
     @extension_endpoint("delete", methods=["POST"])
     @api_response

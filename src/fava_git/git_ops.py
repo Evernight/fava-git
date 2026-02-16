@@ -187,6 +187,23 @@ def create_commit(working_dir: Path, message: str) -> str:
     return ""
 
 
+def checkout(working_dir: Path, ref: str) -> None:
+    """Checkout a commit (detached HEAD)."""
+    if not ref or not ref.strip():
+        raise ValueError("Commit ref is required")
+    # Use rev-parse to validate the ref exists
+    subprocess.check_output(
+        ["git", "rev-parse", "--verify", ref.strip()],
+        cwd=working_dir,
+        text=True,
+    )
+    subprocess.check_output(
+        ["git", "checkout", ref.strip()],
+        cwd=working_dir,
+        text=True,
+    )
+
+
 def delete_file(working_dir: Path, path: str) -> None:
     """Remove file from working tree: git rm for tracked, os.remove for untracked."""
     full = _check_path_in_repo(working_dir, path)

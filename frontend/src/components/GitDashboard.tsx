@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import {
+  useCheckout,
   useCreateCommit,
   useDeleteFile,
   useGitLog,
@@ -34,6 +35,7 @@ export function GitDashboard() {
   const unstageMutation = useUnstageFile();
   const deleteMutation = useDeleteFile();
   const commitMutation = useCreateCommit();
+  const checkoutMutation = useCheckout();
   const isStaging = (path: string) => stageMutation.isPending && stageMutation.variables === path;
   const isUnstaging = (path: string) => unstageMutation.isPending && unstageMutation.variables === path;
   const isDeleting = (path: string) => deleteMutation.isPending && deleteMutation.variables === path;
@@ -100,6 +102,13 @@ export function GitDashboard() {
     }
   };
 
+  const handleCheckout = (hash: string) => {
+    checkoutMutation.mutate(hash);
+  };
+
+  const isCheckingOut = (hash: string) =>
+    checkoutMutation.isPending && checkoutMutation.variables === hash;
+
   return (
     <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2, minHeight: 0 }}>
       <Paper variant="outlined" sx={{ p: 2 }}>
@@ -137,6 +146,9 @@ export function GitDashboard() {
           loading={logLoading}
           error={logError ?? null}
           commits={logData?.commits ?? []}
+          onCheckout={handleCheckout}
+          isCheckingOut={isCheckingOut}
+          checkoutError={checkoutMutation.error ?? null}
         />
       </Box>
     </Box>
