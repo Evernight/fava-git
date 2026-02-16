@@ -13,6 +13,7 @@ export interface GitFileStatus {
 export interface StatusResponse {
   root: string;
   files: GitFileStatus[];
+  head?: string | null;
 }
 
 export interface GitCommit {

@@ -67,6 +67,14 @@ def get_root(working_dir: Path) -> str:
     return _run_git(working_dir, "rev-parse", "--show-toplevel")
 
 
+def get_head(working_dir: Path) -> str | None:
+    """Return current HEAD commit hash, or None if detached/orphan."""
+    try:
+        return _run_git(working_dir, "rev-parse", "HEAD")
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+
+
 def get_log(working_dir: Path, n: int = 50) -> list[GitCommit]:
     """Return commit history from git log."""
     try:

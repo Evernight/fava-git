@@ -14,10 +14,12 @@ function CommitRow({
   commit,
   onCheckout,
   isCheckingOut,
+  isCurrent,
 }: {
   commit: GitCommit;
   onCheckout: (hash: string) => void;
   isCheckingOut: (hash: string) => boolean;
+  isCurrent: boolean;
 }) {
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -32,7 +34,11 @@ function CommitRow({
 
   return (
     <ListItem sx={{ flexDirection: "column", alignItems: "stretch", py: 1.5 }}>
-      <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace" }}>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ fontFamily: "monospace", fontWeight: isCurrent ? 'bold' : 'normal'}}
+      >
         <Link
           component="button"
           variant="inherit"
@@ -45,11 +51,12 @@ function CommitRow({
         >
           {commit.shortHash}
         </Link>{" "}
-        · {commit.author} · {commit.date.slice(0, 16)}
+        · {commit.author} · {commit.date.slice(0, 16)} {isCurrent ? ' << ' : ''}
       </Typography>
       <Typography variant="body2" sx={{ mt: 0.25 }}>
         {commit.subject}
       </Typography>
+      
     </ListItem>
   );
 }
@@ -61,6 +68,7 @@ function CommitSection({
   commits,
   onCheckout,
   isCheckingOut,
+  currentHead,
 }: {
   title: string;
   loading: boolean;
@@ -68,6 +76,7 @@ function CommitSection({
   commits: GitCommit[];
   onCheckout: (hash: string) => void;
   isCheckingOut: (hash: string) => boolean;
+  currentHead: string | null | undefined;
 }) {
   return (
     <>
@@ -91,6 +100,7 @@ function CommitSection({
                 commit={commit}
                 onCheckout={onCheckout}
                 isCheckingOut={isCheckingOut}
+                isCurrent={currentHead != null && commit.hash === currentHead}
               />
             ))}
           </List>
@@ -114,6 +124,7 @@ export function CommitHistory({
   onCheckout,
   isCheckingOut,
   checkoutError,
+  currentHead,
 }: {
   loading: boolean;
   error: Error | null;
@@ -124,6 +135,7 @@ export function CommitHistory({
   onCheckout: (hash: string) => void;
   isCheckingOut: (hash: string) => boolean;
   checkoutError?: Error | null;
+  currentHead?: string | null;
 }) {
   return (
     <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
@@ -140,6 +152,7 @@ export function CommitHistory({
           commits={commits}
           onCheckout={onCheckout}
           isCheckingOut={isCheckingOut}
+          currentHead={currentHead ?? null}
         />
       </Paper>
       <Paper variant="outlined" sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
@@ -150,6 +163,7 @@ export function CommitHistory({
           commits={reflogCommits}
           onCheckout={onCheckout}
           isCheckingOut={isCheckingOut}
+          currentHead={currentHead ?? null}
         />
       </Paper>
     </Box>

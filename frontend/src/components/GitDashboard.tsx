@@ -154,6 +154,7 @@ export function GitDashboard() {
           onCheckout={handleCheckout}
           isCheckingOut={isCheckingOut}
           checkoutError={checkoutMutation.error ?? null}
+          currentHead={data?.head}
         />
       </Box>
     </Box>

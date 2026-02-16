@@ -17,6 +17,7 @@ from .git_ops import create_commit
 from .git_ops import delete_file
 from .git_ops import GitCommit
 from .git_ops import GitFileStatus
+from .git_ops import get_head
 from .git_ops import get_log
 from .git_ops import get_reflog
 from .git_ops import get_root
@@ -81,9 +82,11 @@ class FavaGit(FavaExtensionBase):
 
         root = get_root(working_dir)
         files = status_porcelain(working_dir)
+        head = get_head(working_dir)
         return {
             "root": root,
             "files": [_file_status_to_dict(f) for f in files],
+            "head": head,
         }
 
     @extension_endpoint("log")
