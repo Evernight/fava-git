@@ -18,6 +18,7 @@ from .git_ops import delete_file
 from .git_ops import GitCommit
 from .git_ops import GitFileStatus
 from .git_ops import get_log
+from .git_ops import get_reflog
 from .git_ops import get_root
 from .git_ops import init_repo
 from .git_ops import is_git_repo
@@ -95,6 +96,18 @@ class FavaGit(FavaExtensionBase):
         n = request.args.get("n", "50", type=int)
         n = min(max(1, n), 200)
         commits = get_log(working_dir, n=n)
+        return {"commits": [c.to_dict() for c in commits]}
+
+    @extension_endpoint("reflog")
+    @api_response
+    def api_reflog(self) -> dict:
+        """Return recent reflog entries."""
+        working_dir = self._working_dir()
+        if not is_git_repo(working_dir):
+            raise FavaAPIError("Not a git repository")
+        n = request.args.get("n", "5", type=int)
+        n = min(max(1, n), 50)
+        commits = get_reflog(working_dir, n=n)
         return {"commits": [c.to_dict() for c in commits]}
 
     @extension_endpoint("commit", methods=["POST"])

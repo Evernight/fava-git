@@ -95,6 +95,34 @@ def get_log(working_dir: Path, n: int = 50) -> list[GitCommit]:
     return commits
 
 
+def get_reflog(working_dir: Path, n: int = 5) -> list[GitCommit]:
+    """Return recent reflog entries (HEAD movements)."""
+    try:
+        out = subprocess.check_output(
+            ["git", "log", "-g", f"-n{n}", "--format=%H%x00%h%x00%an%x00%ai%x00%gs", "--date=iso"],
+            cwd=working_dir,
+            text=True,
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return []
+    commits: list[GitCommit] = []
+    for line in out.strip().split("\n"):
+        if not line:
+            continue
+        parts = line.split("\0")
+        if len(parts) >= 5:
+            commits.append(
+                GitCommit(
+                    hash=parts[0],
+                    short_hash=parts[1],
+                    author=parts[2],
+                    date=parts[3],
+                    subject=parts[4],
+                )
+            )
+    return commits
+
+
 def status_porcelain(working_dir: Path) -> list[GitFileStatus]:
     """Run 'git status --porcelain -z' and return parsed file statuses.
 

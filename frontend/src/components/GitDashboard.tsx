@@ -12,6 +12,7 @@ import {
   useCreateCommit,
   useDeleteFile,
   useGitLog,
+  useGitReflog,
   useGitStatus,
   useInitRepo,
   useStageFile,
@@ -31,6 +32,7 @@ export function GitDashboard() {
   const initMutation = useInitRepo();
   const isNotGitRepo = error && String(error).includes("Not a git repository");
   const { data: logData, isLoading: logLoading, error: logError } = useGitLog(10, !!data);
+  const { data: reflogData, isLoading: reflogLoading, error: reflogError } = useGitReflog(5, !!data);
   const stageMutation = useStageFile();
   const unstageMutation = useUnstageFile();
   const deleteMutation = useDeleteFile();
@@ -146,6 +148,9 @@ export function GitDashboard() {
           loading={logLoading}
           error={logError ?? null}
           commits={logData?.commits ?? []}
+          reflogLoading={reflogLoading}
+          reflogError={reflogError ?? null}
+          reflogCommits={reflogData?.commits ?? []}
           onCheckout={handleCheckout}
           isCheckingOut={isCheckingOut}
           checkoutError={checkoutMutation.error ?? null}

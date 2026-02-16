@@ -48,6 +48,17 @@ export function useGitLog(n = 10, enabled = true) {
   });
 }
 
+export function useGitReflog(n = 5, enabled = true) {
+  const params = new URLSearchParams(location.search);
+  const q = params.toString();
+  const url = q ? `reflog?n=${n}&${q}` : `reflog?n=${n}`;
+  return useQuery({
+    queryKey: [...gitStatusQueryKey, "reflog", n, url],
+    queryFn: () => fetchJSON<LogResponse>(url),
+    enabled,
+  });
+}
+
 export function useStageFile() {
   const queryClient = useQueryClient();
   return useMutation({
