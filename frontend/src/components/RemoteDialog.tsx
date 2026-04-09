@@ -45,6 +45,9 @@ export function RemoteDialog({
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>Remote Operations</DialogTitle>
       <DialogContent dividers>
+        {!remote ? (
+          <Alert severity="info">No remote configured for this repository.</Alert>
+        ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Typography variant="body2" color="text.secondary">
             Remote: <strong>{remote}</strong>
@@ -88,6 +91,7 @@ export function RemoteDialog({
             <Alert severity="error">{String(pushMutation.error)}</Alert>
           )}
         </Box>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Close</Button>

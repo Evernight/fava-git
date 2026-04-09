@@ -137,13 +137,11 @@ export function GitDashboard() {
           >
             {commitMutation.isPending ? "Committing…" : "Create commit"}
           </Button>
-          {data?.remote && (
-            <Tooltip title="Remote operations (pull / push)">
-              <IconButton onClick={() => setRemoteDialogOpen(true)} size="small">
-                <SettingsIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
+          <Tooltip title="Remote operations (pull / push)">
+            <IconButton onClick={() => setRemoteDialogOpen(true)} size="small">
+              <SettingsIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Box>
       </Paper>
       <Box sx={{ display: "flex", flexDirection: "row", gap: 2, flex: 1, minHeight: 0 }}>
