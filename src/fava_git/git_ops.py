@@ -240,6 +240,49 @@ def checkout(working_dir: Path, ref: str) -> None:
     )
 
 
+def get_remote(working_dir: Path) -> str | None:
+    """Return the remote name for the current branch, or first configured remote, else None."""
+    try:
+        remote = _run_git(working_dir, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}")
+        return remote.split("/")[0]
+    except subprocess.CalledProcessError:
+        pass
+    try:
+        remotes = _run_git(working_dir, "remote")
+        names = [r.strip() for r in remotes.splitlines() if r.strip()]
+        return names[0] if names else None
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+
+
+def pull_ff_only(working_dir: Path) -> str:
+    """Pull from remote using --ff-only. Raises CalledProcessError on failure."""
+    try:
+        return subprocess.check_output(
+            ["git", "pull", "--ff-only"],
+            cwd=working_dir,
+            text=True,
+            stderr=subprocess.STDOUT,
+        ).strip()
+    except subprocess.CalledProcessError as e:
+        output = (e.output or "").strip()
+        raise subprocess.CalledProcessError(e.returncode, e.cmd, output) from e
+
+
+def push_remote(working_dir: Path) -> str:
+    """Push to remote. Raises CalledProcessError on conflict/failure."""
+    try:
+        return subprocess.check_output(
+            ["git", "push"],
+            cwd=working_dir,
+            text=True,
+            stderr=subprocess.STDOUT,
+        ).strip()
+    except subprocess.CalledProcessError as e:
+        output = (e.output or "").strip()
+        raise subprocess.CalledProcessError(e.returncode, e.cmd, output) from e
+
+
 def delete_file(working_dir: Path, path: str) -> None:
     """Remove file from working tree: git rm for tracked, os.remove for untracked."""
     full = _check_path_in_repo(working_dir, path)

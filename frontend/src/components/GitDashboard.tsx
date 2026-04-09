@@ -3,10 +3,14 @@ import {
   Box,
   Button,
   CircularProgress,
+  IconButton,
   Paper,
   TextField,
+  Tooltip,
 } from "@mui/material";
+import SettingsIcon from "@mui/icons-material/Settings";
 import { useState } from "react";
+import { RemoteDialog } from "./RemoteDialog";
 import {
   useCheckout,
   useCreateCommit,
@@ -28,6 +32,7 @@ function defaultCommitMessage(): string {
 
 export function GitDashboard() {
   const [commitMessage, setCommitMessage] = useState(defaultCommitMessage);
+  const [remoteDialogOpen, setRemoteDialogOpen] = useState(false);
   const { data, isLoading, error } = useGitStatus();
   const initMutation = useInitRepo();
   const isNotGitRepo = error && String(error).includes("Not a git repository");
@@ -132,6 +137,11 @@ export function GitDashboard() {
           >
             {commitMutation.isPending ? "Committing…" : "Create commit"}
           </Button>
+          <Tooltip title="Remote operations (pull / push)">
+            <IconButton onClick={() => setRemoteDialogOpen(true)} size="small">
+              <SettingsIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Box>
       </Paper>
       <Box sx={{ display: "flex", flexDirection: "row", gap: 2, flex: 1, minHeight: 0 }}>
@@ -157,6 +167,11 @@ export function GitDashboard() {
           currentHead={data?.head}
         />
       </Box>
+      <RemoteDialog
+        open={remoteDialogOpen}
+        onClose={() => setRemoteDialogOpen(false)}
+        remote={data.remote}
+      />
     </Box>
   );
 }

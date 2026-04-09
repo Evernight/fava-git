@@ -14,6 +14,7 @@ export interface StatusResponse {
   root: string;
   files: GitFileStatus[];
   head?: string | null;
+  remote?: string | null;
 }
 
 export interface GitCommit {
@@ -114,6 +115,26 @@ export function useInitRepo() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => postJSON<{ root: string }>("init", {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: gitStatusQueryKey });
+    },
+  });
+}
+
+export function usePull() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => postJSON<{ output: string }>("pull", {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: gitStatusQueryKey });
+    },
+  });
+}
+
+export function usePush() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => postJSON<{ output: string }>("push", {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: gitStatusQueryKey });
     },
