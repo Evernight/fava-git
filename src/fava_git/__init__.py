@@ -20,9 +20,12 @@ from .git_ops import GitFileStatus
 from .git_ops import get_head
 from .git_ops import get_log
 from .git_ops import get_reflog
+from .git_ops import get_remote
 from .git_ops import get_root
 from .git_ops import init_repo
 from .git_ops import is_git_repo
+from .git_ops import pull_ff_only
+from .git_ops import push_remote
 from .git_ops import stage_file
 from .git_ops import status_porcelain
 from .git_ops import unstage_file
@@ -83,10 +86,12 @@ class FavaGit(FavaExtensionBase):
         root = get_root(working_dir)
         files = status_porcelain(working_dir)
         head = get_head(working_dir)
+        remote = get_remote(working_dir)
         return {
             "root": root,
             "files": [_file_status_to_dict(f) for f in files],
             "head": head,
+            "remote": remote,
         }
 
     @extension_endpoint("log")
@@ -205,3 +210,35 @@ class FavaGit(FavaExtensionBase):
         except ValueError as e:
             raise FavaAPIError(str(e)) from e
         return {"path": path}
+
+    @extension_endpoint("pull", methods=["POST"])
+    @api_response
+    def api_pull(self) -> dict:
+        """Pull from remote using --ff-only. Aborts if merge/rebase would be needed."""
+        working_dir = self._working_dir()
+        if not is_git_repo(working_dir):
+            raise FavaAPIError("Not a git repository")
+        remote = get_remote(working_dir)
+        if not remote:
+            raise FavaAPIError("No remote configured")
+        try:
+            output = pull_ff_only(working_dir)
+        except subprocess.CalledProcessError as e:
+            raise FavaAPIError(e.output or "Pull failed (not fast-forward or conflict)") from e
+        return {"output": output}
+
+    @extension_endpoint("push", methods=["POST"])
+    @api_response
+    def api_push(self) -> dict:
+        """Push to remote. Aborts if conflicts are found."""
+        working_dir = self._working_dir()
+        if not is_git_repo(working_dir):
+            raise FavaAPIError("Not a git repository")
+        remote = get_remote(working_dir)
+        if not remote:
+            raise FavaAPIError("No remote configured")
+        try:
+            output = push_remote(working_dir)
+        except subprocess.CalledProcessError as e:
+            raise FavaAPIError(e.output or "Push failed (conflict or no upstream)") from e
+        return {"output": output}
