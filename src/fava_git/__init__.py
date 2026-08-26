@@ -23,6 +23,7 @@ from .git_ops import get_reflog
 from .git_ops import get_root
 from .git_ops import init_repo
 from .git_ops import is_git_repo
+from .git_ops import stage_all
 from .git_ops import stage_file
 from .git_ops import status_porcelain
 from .git_ops import unstage_file
@@ -119,13 +120,14 @@ class FavaGit(FavaExtensionBase):
         """Create a new commit with the given message."""
         payload = request.get_json(silent=True) or {}
         message = (payload.get("message") or "").strip()
+        stage_all_files = bool(payload.get("all") or payload.get("stageAll") or payload.get("stage_all"))
         if not message:
             raise FavaAPIError("Commit message is required")
         working_dir = self._working_dir()
         if not is_git_repo(working_dir):
             raise FavaAPIError("Not a git repository")
         try:
-            commit_hash = create_commit(working_dir, message)
+            commit_hash = create_commit(working_dir, message, stage_all_files=stage_all_files)
         except ValueError as e:
             raise FavaAPIError(str(e)) from e
         except subprocess.CalledProcessError as e:

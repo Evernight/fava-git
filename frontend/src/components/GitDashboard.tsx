@@ -9,6 +9,7 @@ import {
 import { useState } from "react";
 import {
   useCheckout,
+  useCommitAll,
   useCreateCommit,
   useDeleteFile,
   useGitLog,
@@ -37,6 +38,7 @@ export function GitDashboard() {
   const unstageMutation = useUnstageFile();
   const deleteMutation = useDeleteFile();
   const commitMutation = useCreateCommit();
+  const commitAllMutation = useCommitAll();
   const checkoutMutation = useCheckout();
   const isStaging = (path: string) => stageMutation.isPending && stageMutation.variables === path;
   const isUnstaging = (path: string) => unstageMutation.isPending && unstageMutation.variables === path;
@@ -104,12 +106,22 @@ export function GitDashboard() {
     }
   };
 
+  const handleCommitAll = () => {
+    if (commitMessage.trim()) {
+      commitAllMutation.mutate(commitMessage.trim(), {
+        onSuccess: () => setCommitMessage(defaultCommitMessage()),
+      });
+    }
+  };
+
   const handleCheckout = (hash: string) => {
     checkoutMutation.mutate(hash);
   };
 
   const isCheckingOut = (hash: string) =>
     checkoutMutation.isPending && checkoutMutation.variables === hash;
+
+  const isCommitting = commitMutation.isPending || commitAllMutation.isPending;
 
   return (
     <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2, minHeight: 0 }}>
@@ -122,15 +134,28 @@ export function GitDashboard() {
             size="small"
             sx={{ flex: 1, minWidth: 200 }}
             placeholder="Update YYYY-MM-DD"
-            error={!!commitMutation.error}
-            helperText={commitMutation.error ? String(commitMutation.error) : undefined}
+            error={!!commitMutation.error || !!commitAllMutation.error}
+            helperText={
+              commitMutation.error
+                ? String(commitMutation.error)
+                : commitAllMutation.error
+                  ? String(commitAllMutation.error)
+                  : undefined
+            }
           />
           <Button
             variant="contained"
             onClick={handleCommit}
-            disabled={commitMutation.isPending || !commitMessage.trim()}
+            disabled={isCommitting || !commitMessage.trim()}
           >
             {commitMutation.isPending ? "Committing…" : "Create commit"}
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleCommitAll}
+            disabled={isCommitting || !commitMessage.trim()}
+          >
+            {commitAllMutation.isPending ? "Committing…" : "Commit all"}
           </Button>
         </Box>
       </Paper>

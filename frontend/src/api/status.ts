@@ -100,6 +100,16 @@ export function useCreateCommit() {
   });
 }
 
+export function useCommitAll() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (message: string) => postJSON<{ hash: string }>("commit", { message, all: true }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: gitStatusQueryKey });
+    },
+  });
+}
+
 export function useCheckout() {
   const queryClient = useQueryClient();
   return useMutation({
