@@ -202,11 +202,18 @@ def unstage_file(working_dir: Path, path: str) -> None:
     subprocess.check_output(["git", "reset", "HEAD", "--", path], cwd=working_dir, text=True)
 
 
-def create_commit(working_dir: Path, message: str) -> str:
+def stage_all(working_dir: Path) -> None:
+    """Stage all changes with 'git add -A'."""
+    subprocess.check_output(["git", "add", "-A"], cwd=working_dir, text=True)
+
+
+def create_commit(working_dir: Path, message: str, stage_all_files: bool = False) -> str:
     """Create a commit with the given message. Returns the new commit hash."""
     msg = (message or "").strip()
     if not msg:
         raise ValueError("Commit message is required")
+    if stage_all_files:
+        stage_all(working_dir)
     out = subprocess.check_output(
         ["git", "commit", "-m", msg],
         cwd=working_dir,
